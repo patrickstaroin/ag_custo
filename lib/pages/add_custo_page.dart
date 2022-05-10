@@ -53,10 +53,12 @@ class _AddCustoPageState extends State<AddCustoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(color: Colors.white),
+        backgroundColor: Colors.cyan.shade700,
         centerTitle: true,
         title: Text(
           'ADICIONAR NOVO CUSTO',
-          style: TextStyle(color: Colors.grey.shade900),
+          style: TextStyle(color: Colors.white),
         ),
       ),
       body: Padding(
@@ -238,15 +240,18 @@ class _AddCustoPageState extends State<AddCustoPage> {
                 margin: const EdgeInsets.only(top: 24),
                 child: ElevatedButton(
                   onPressed: adicionarCusto,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.cyan.shade700,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.check),
+                      Icon(Icons.check, color: Colors.white),
                       Padding(
                         padding: EdgeInsets.all(16),
                         child: Text(
                           'ADICIONAR',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: 20, color: Colors.white),
                         ),
                       )
                     ],

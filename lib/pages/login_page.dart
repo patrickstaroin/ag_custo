@@ -1,5 +1,6 @@
 import 'package:ag_custo/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,11 +14,14 @@ class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
   final email = TextEditingController();
   final senha = TextEditingController();
+  bool loading = false;
 
   login() async {
+    setState(() => loading = true);
     try {
       await context.read<AuthService>().login(email.text, senha.text);
     } on AuthException catch (e) {
+      setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.messsage),
@@ -29,6 +33,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.cyan.shade700,
+        title: const Text(
+          'AG Custo',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(top: 100),
@@ -37,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   "Bem Vindo!",
                   style: TextStyle(
                     fontSize: 35,
@@ -59,6 +73,10 @@ class _LoginPageState extends State<LoginPage> {
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Informe o email corretamente!';
+                      } else if (!RegExp(
+                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                          .hasMatch(value)) {
+                        return 'Informe um email válido! example@email.com';
                       }
                       return null;
                     },
@@ -91,21 +109,37 @@ class _LoginPageState extends State<LoginPage> {
                         login();
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.cyan.shade700,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check,
-                          color: Colors.white,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            "Entrar",
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                        ),
-                      ],
+                      children: (loading)
+                          ? [
+                              Padding(
+                                padding: EdgeInsets.all(16),
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ]
+                          : [
+                              Icon(
+                                Icons.check,
+                                color: Colors.white,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text(
+                                  "Entrar",
+                                  style: TextStyle(
+                                      fontSize: 20, color: Colors.white),
+                                ),
+                              ),
+                            ],
                     ),
                   ),
                 ),

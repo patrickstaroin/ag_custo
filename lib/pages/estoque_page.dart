@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/carro.dart';
+import '../services/auth_service.dart';
 
 class EstoquePage extends StatefulWidget {
   const EstoquePage({Key? key}) : super(key: key);
@@ -55,6 +56,11 @@ class _EstoquePageState extends State<EstoquePage> {
           IconButton(
             onPressed: () => carroRepo.ordena(),
             icon: const Icon(Icons.swap_vert),
+            color: Colors.white,
+          ),
+          IconButton(
+            onPressed: () => context.read<AuthService>().logout(),
+            icon: const Icon(Icons.logout),
             color: Colors.white,
           ),
         ],
