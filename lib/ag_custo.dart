@@ -1,7 +1,6 @@
-import 'package:ag_custo/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
-import 'pages/estoque_page.dart';
+import 'widgets/auth_check.dart';
 
 class AgCusto extends StatelessWidget {
   const AgCusto({Key? key}) : super(key: key);
@@ -14,7 +13,7 @@ class AgCusto extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.cyan,
       ),
-      home: HomePage(),
+      home: AuthCheck(),
     );
   }
 }
