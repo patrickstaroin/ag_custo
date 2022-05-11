@@ -1,6 +1,5 @@
 import 'package:ag_custo/pages/add_custo_page.dart';
 import 'package:ag_custo/repositories/carro_repository.dart';
-import 'package:ag_custo/repositories/sem_fotos_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -18,10 +17,8 @@ class EstoquePage extends StatefulWidget {
 class _EstoquePageState extends State<EstoquePage> {
   late CarroRepository carroRepo;
   NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
-  late final _formAddCarro = GlobalKey<FormState>();
-  final _novoCarro = TextEditingController();
-  String _addPlaca = '';
-  late SemFotosRepository semFotos;
+
+  //late SemFotosRepository semFotos;
 
   @override
   void initState() {
@@ -41,7 +38,7 @@ class _EstoquePageState extends State<EstoquePage> {
 
   @override
   Widget build(BuildContext context) {
-    semFotos = Provider.of<SemFotosRepository>(context);
+    //semFotos = Provider.of<SemFotosRepository>(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -86,87 +83,21 @@ class _EstoquePageState extends State<EstoquePage> {
                         '     ' +
                         tabela[carro].anofab.toString() +
                         '/' +
-                        tabela[carro].anomod.toString()),
-                    trailing: Text(real.format(tabela[carro].valor)),
+                        tabela[carro].anomod.toString() +
+                        '     ' +
+                        real.format(tabela[carro].valor)),
+                    trailing: PopupMenuButton(
+                      itemBuilder: (context) => [
+                        PopupMenuItem(child: Text('Adicionar custo')),
+                        PopupMenuItem(child: Text('Ver custos')),
+                      ],
+                    ),
                     onTap: () => addCusto(tabela[carro]),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   separatorBuilder: (_, __) => const Divider(),
                 );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                title: Text('Adicionar novo veículo'),
-                content: Form(
-                  key: _formAddCarro,
-                  child: TextFormField(
-                    controller: _novoCarro,
-                    style: const TextStyle(fontSize: 22),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Placa',
-                      prefixIcon: Icon(Icons.abc),
-                    ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Informe a placa';
-                      }
-                      _addPlaca = value;
-                      return null;
-                    },
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _novoCarro.clear();
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Cancelar',
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      if (_formAddCarro.currentState!.validate()) {
-                        carroRepo.adicionaCarro(_addPlaca);
-                        semFotos.attLista(CarroRepository.tabela);
-                        _novoCarro.clear();
-                        Navigator.pop(context);
-                        setState(() {});
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Veículo adicionado com sucesso!'),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Ok',
-                    ),
-                  ),
-                ]),
-          );
-        },
-        backgroundColor: Colors.cyan.shade700,
-        label: const Text(
-          'NOVO CARRO',
-          style: TextStyle(
-            fontSize: 16,
-            letterSpacing: 1,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        icon: const Icon(
-          Icons.add_circle_outline_rounded,
-          color: Colors.white,
-        ),
       ),
     );
   }

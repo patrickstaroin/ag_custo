@@ -11,7 +11,8 @@ class SemFotosRepository extends ChangeNotifier {
 
   attLista(List<Carro> carros) {
     carros.forEach((carro) {
-      if (carro.foto.compareTo('images/default.jpg') == 0) {
+      if (carro.foto.compareTo('images/default.jpg') == 0 &&
+          !_lista.contains(carro)) {
         _lista.add(carro);
         print('adicionou carro');
       }
