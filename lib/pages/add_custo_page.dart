@@ -1,8 +1,12 @@
+import 'package:ag_custo/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../models/carro.dart';
+import '../models/custo.dart';
+import '../repositories/custo_repository.dart';
 
 class AddCustoPage extends StatefulWidget {
   Carro carro;
@@ -23,7 +27,19 @@ class _AddCustoPageState extends State<AddCustoPage> {
 
   adicionarCusto() {
     if (_form.currentState!.validate()) {
-      //salvar custo
+      CustoRepository custoRepo =
+          CustoRepository(auth: context.read<AuthService>());
+      Custo novoCusto = Custo(
+        descricao: _descricao.text,
+        valor: double.parse(_valorCusto.text.replaceAll(',', '.')),
+        formaPag: _formaPagamento,
+        dataPag: _dataPagamento.day.toString() +
+            '/' +
+            _dataPagamento.month.toString() +
+            '/' +
+            _dataPagamento.year.toString(),
+      );
+      custoRepo.addCusto(widget.carro, novoCusto);
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(

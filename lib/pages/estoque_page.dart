@@ -1,4 +1,5 @@
 import 'package:ag_custo/pages/add_custo_page.dart';
+import 'package:ag_custo/pages/mostra_custo_page.dart';
 import 'package:ag_custo/repositories/carro_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,6 +33,15 @@ class _EstoquePageState extends State<EstoquePage> {
       context,
       MaterialPageRoute(
         builder: (_) => AddCustoPage(carro: carro),
+      ),
+    );
+  }
+
+  mostraCusto(Carro carro) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MostraCustoPage(carro: carro),
       ),
     );
   }
@@ -88,9 +98,17 @@ class _EstoquePageState extends State<EstoquePage> {
                         real.format(tabela[carro].valor)),
                     trailing: PopupMenuButton(
                       itemBuilder: (context) => [
-                        PopupMenuItem(child: Text('Adicionar custo')),
-                        PopupMenuItem(child: Text('Ver custos')),
+                        PopupMenuItem(child: Text('Novo custo'), value: 0),
+                        PopupMenuItem(child: Text('Ver custos'), value: 1),
                       ],
+                      onSelected: (result) {
+                        if (result == 0) {
+                          addCusto(tabela[carro]);
+                        }
+                        if (result == 1) {
+                          mostraCusto(tabela[carro]);
+                        }
+                      },
                     ),
                     onTap: () => addCusto(tabela[carro]),
                   ),
