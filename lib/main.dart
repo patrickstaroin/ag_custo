@@ -16,9 +16,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => SemFotosRepository()),
-        /*  ChangeNotifierProvider(
+        ChangeNotifierProvider(
             create: (context) =>
-                CustoRepository(auth: context.read<AuthService>())),*/
+                CustoRepository(auth: context.read<AuthService>())),
       ],
       child: const AgCusto(),
     ),

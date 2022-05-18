@@ -14,7 +14,6 @@ class SemFotosRepository extends ChangeNotifier {
       if (carro.foto.compareTo('images/default.jpg') == 0 &&
           !_lista.contains(carro)) {
         _lista.add(carro);
-        print('adicionou carro');
       }
     });
     notifyListeners();

@@ -10,6 +10,7 @@ import '../repositories/custo_repository.dart';
 
 class AddCustoPage extends StatefulWidget {
   Carro carro;
+
   AddCustoPage({Key? key, required this.carro}) : super(key: key);
 
   @override
@@ -24,6 +25,7 @@ class _AddCustoPageState extends State<AddCustoPage> {
   String _formaPagamento = '';
   DateTime _dataPagamento =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  late Custo _editCusto;
 
   adicionarCusto() {
     if (_form.currentState!.validate()) {
@@ -41,10 +43,14 @@ class _AddCustoPageState extends State<AddCustoPage> {
       );
       custoRepo.addCusto(widget.carro, novoCusto);
       Navigator.pop(context);
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Custo adicionado com sucesso!'),
+        SnackBar(
+          duration: Duration(seconds: 6),
+          content: Text('Custo: [' +
+              novoCusto.descricao +
+              ' ' +
+              real.format(novoCusto.valor) +
+              '] adicionado com sucesso!'),
         ),
       );
     }
@@ -63,6 +69,10 @@ class _AddCustoPageState extends State<AddCustoPage> {
         _dataPagamento = newDate;
       });
     }
+  }
+
+  setEditCusto(Custo custo) {
+    _editCusto = custo;
   }
 
   @override
@@ -121,134 +131,140 @@ class _AddCustoPageState extends State<AddCustoPage> {
                   ],
                 ),
               ),
-              Form(
-                key: _form,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _descricao,
-                      style: const TextStyle(fontSize: 22),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Descrição',
-                        prefixIcon: Icon(Icons.abc),
-                      ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Informe a descrição do custo';
-                        }
-                        return null;
-                      },
-                    ),
-                    const Padding(padding: EdgeInsets.only(top: 24.0)),
-                    TextFormField(
-                      controller: _valorCusto,
-                      style: const TextStyle(fontSize: 22),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Valor',
-                        prefixIcon: Icon(Icons.monetization_on),
-                        suffix: Text('reais', style: TextStyle(fontSize: 14)),
-                      ),
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'(^\d*\,?\d{0,2})'))
-                      ],
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Informe o valor';
-                        } else if (double.parse(value.replaceAll(',', '.')) <=
-                            0) {
-                          return 'O valor precisa ser maior que R\$ 0,00';
-                        }
-                        return null;
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: DropdownButtonFormField<String>(
+              const Divider(
+                thickness: 1.0,
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 24.0),
+                child: Form(
+                  key: _form,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _descricao,
+                        style: const TextStyle(fontSize: 22),
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          label: Text(
-                            'Forma de pagamento',
-                            style: TextStyle(fontSize: 22),
-                          ),
+                          labelText: 'Descrição',
+                          prefixIcon: Icon(Icons.abc),
                         ),
-                        items: const [
-                          DropdownMenuItem(
-                            child: Text('Dinheiro',
-                                style: TextStyle(fontSize: 22)),
-                            value: 'Dinheiro',
-                          ),
-                          DropdownMenuItem(
-                            child: Text('Cartão de crédito',
-                                style: TextStyle(fontSize: 22)),
-                            value: 'Cartão de crédito',
-                          ),
-                          DropdownMenuItem(
-                            child: Text('Cartão de débito',
-                                style: TextStyle(fontSize: 22)),
-                            value: 'Cartão de débito',
-                          ),
-                          DropdownMenuItem(
-                            child:
-                                Text('Boleto', style: TextStyle(fontSize: 22)),
-                            value: 'Boleto',
-                          ),
-                          DropdownMenuItem(
-                            child: Text('TED/DOC/PIX',
-                                style: TextStyle(fontSize: 22)),
-                            value: 'TED/DOC/PIX',
-                          ),
-                          DropdownMenuItem(
-                            child:
-                                Text('Cheque', style: TextStyle(fontSize: 22)),
-                            value: 'Cheque',
-                          ),
-                        ],
-                        onChanged: (value) => _formaPagamento = value ?? '',
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Selecione a forma de pagamento';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 24.0),
-                      child: TextFormField(
-                        key: Key(_dataPagamento.toString()),
-                        readOnly: true,
-                        onTap: () {
-                          setState(() {
-                            _selectDate();
-                          });
-                        },
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          label: Text(
-                            'Data do pagamento',
-                            style: TextStyle(fontSize: 22),
-                          ),
-                        ),
-                        initialValue: _dataPagamento.day.toString() +
-                            '/' +
-                            _dataPagamento.month.toString() +
-                            '/' +
-                            _dataPagamento.year.toString(),
-                        style: const TextStyle(fontSize: 20),
                         validator: (value) {
                           if (value!.isEmpty) {
-                            return 'Informe a data do pagamento';
+                            return 'Informe a descrição do custo';
                           }
                           return null;
                         },
                       ),
-                    ),
-                  ],
+                      const Padding(padding: EdgeInsets.only(top: 24.0)),
+                      TextFormField(
+                        controller: _valorCusto,
+                        style: const TextStyle(fontSize: 22),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Valor',
+                          prefixIcon: Icon(Icons.monetization_on),
+                          suffix: Text('reais', style: TextStyle(fontSize: 14)),
+                        ),
+                        keyboardType:
+                            TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'(^\d*\,?\d{0,2})'))
+                        ],
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Informe o valor';
+                          } else if (double.parse(value.replaceAll(',', '.')) <=
+                              0) {
+                            return 'O valor precisa ser maior que R\$ 0,00';
+                          }
+                          return null;
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24.0),
+                        child: DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            label: Text(
+                              'Forma de pagamento',
+                              style: TextStyle(fontSize: 22),
+                            ),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              child: Text('Dinheiro',
+                                  style: TextStyle(fontSize: 22)),
+                              value: 'Dinheiro',
+                            ),
+                            DropdownMenuItem(
+                              child: Text('Cartão de crédito',
+                                  style: TextStyle(fontSize: 22)),
+                              value: 'Cartão de crédito',
+                            ),
+                            DropdownMenuItem(
+                              child: Text('Cartão de débito',
+                                  style: TextStyle(fontSize: 22)),
+                              value: 'Cartão de débito',
+                            ),
+                            DropdownMenuItem(
+                              child: Text('Boleto',
+                                  style: TextStyle(fontSize: 22)),
+                              value: 'Boleto',
+                            ),
+                            DropdownMenuItem(
+                              child: Text('TED/DOC/PIX',
+                                  style: TextStyle(fontSize: 22)),
+                              value: 'TED/DOC/PIX',
+                            ),
+                            DropdownMenuItem(
+                              child: Text('Cheque',
+                                  style: TextStyle(fontSize: 22)),
+                              value: 'Cheque',
+                            ),
+                          ],
+                          onChanged: (value) => _formaPagamento = value ?? '',
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Selecione a forma de pagamento';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 24.0),
+                        child: TextFormField(
+                          key: Key(_dataPagamento.toString()),
+                          readOnly: true,
+                          onTap: () {
+                            setState(() {
+                              _selectDate();
+                            });
+                          },
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            label: Text(
+                              'Data do pagamento',
+                              style: TextStyle(fontSize: 22),
+                            ),
+                          ),
+                          initialValue: _dataPagamento.day.toString() +
+                              '/' +
+                              _dataPagamento.month.toString() +
+                              '/' +
+                              _dataPagamento.year.toString(),
+                          style: const TextStyle(fontSize: 20),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Informe a data do pagamento';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(

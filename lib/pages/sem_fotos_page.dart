@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../models/carro.dart';
 import '../repositories/carro_repository.dart';
 
 class SemFotosPage extends StatefulWidget {
@@ -141,7 +140,7 @@ class _SemFotosPageState extends State<SemFotosPage> {
           ),
         ),
         icon: const Icon(
-          Icons.add_circle_outline_rounded,
+          Icons.add,
           color: Colors.white,
         ),
       ),

@@ -1,4 +1,5 @@
 class Custo {
+  late String docID;
   String descricao;
   double valor;
   String formaPag;
