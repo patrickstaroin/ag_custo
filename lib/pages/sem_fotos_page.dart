@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../models/carro.dart';
 import '../repositories/carro_repository.dart';
 
 class SemFotosPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class SemFotosPage extends StatefulWidget {
 class _SemFotosPageState extends State<SemFotosPage> {
   NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
   late CarroRepository carroRepo;
+  late List<Carro> tabela;
   late final _formAddCarro = GlobalKey<FormState>();
   final _novoCarro = TextEditingController();
   String _addPlaca = '';
@@ -22,12 +24,13 @@ class _SemFotosPageState extends State<SemFotosPage> {
 
   void initState() {
     super.initState();
-    carroRepo = CarroRepository();
   }
 
   @override
   Widget build(BuildContext context) {
     semFotos = Provider.of<SemFotosRepository>(context);
+    carroRepo = context.watch<CarroRepository>();
+    tabela = carroRepo.tabela;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -109,8 +112,18 @@ class _SemFotosPageState extends State<SemFotosPage> {
                   TextButton(
                     onPressed: () {
                       if (_formAddCarro.currentState!.validate()) {
-                        carroRepo.adicionaCarro(_addPlaca);
-                        semFotos.attLista(CarroRepository.tabela);
+                        Carro novoCarro = Carro(
+                            id: 0,
+                            foto: 'images/default.jpg',
+                            marca: '',
+                            modelo: '',
+                            versao: '',
+                            anofab: 0,
+                            anomod: 0,
+                            valor: 0.0,
+                            placa: _addPlaca);
+                        carroRepo.atualizaEstoque(novoCarro);
+                        semFotos.attLista(tabela);
                         _novoCarro.clear();
                         Navigator.pop(context);
                         setState(() {});

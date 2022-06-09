@@ -32,7 +32,7 @@ class CustoRepository extends ChangeNotifier {
     if (auth.usuario != null && _custoList.isEmpty) {
       final snapshot = await db
           .collection(
-              'usuarios/${auth.usuario!.uid}/carros/${carro.placa}/custos')
+              'usuarios/${auth.usuario!.email}/carros/${carro.placa}/custos')
           .get();
       snapshot.docs.forEach((doc) {
         Custo custo = Custo(
@@ -55,7 +55,7 @@ class CustoRepository extends ChangeNotifier {
   addCusto(Carro carro, Custo custo) async {
     await db
         .collection(
-            'usuarios/${auth.usuario!.uid}/carros/${carro.placa}/custos')
+            'usuarios/${auth.usuario!.email}/carros/${carro.placa}/custos')
         .doc()
         .set({
       'descricao': custo.descricao,
@@ -70,7 +70,7 @@ class CustoRepository extends ChangeNotifier {
   removeCusto(Carro carro, Custo custo) async {
     await db
         .collection(
-            'usuarios/${auth.usuario!.uid}/carros/${carro.placa}/custos')
+            'usuarios/${auth.usuario!.email}/carros/${carro.placa}/custos')
         .doc(custo.docID)
         .delete();
     _custoList.remove(custo);

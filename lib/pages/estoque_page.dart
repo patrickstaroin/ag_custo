@@ -18,14 +18,14 @@ class EstoquePage extends StatefulWidget {
 class _EstoquePageState extends State<EstoquePage> {
   late CarroRepository carroRepo;
   NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
-
+  late List<Carro> tabela;
   //late SemFotosRepository semFotos;
 
   @override
   void initState() {
     super.initState();
-    carroRepo = CarroRepository();
-    carroRepo.ordena();
+    //carroRepo = CarroRepository();
+    //carroRepo.ordena();
   }
 
   addCusto(Carro carro) {
@@ -49,6 +49,8 @@ class _EstoquePageState extends State<EstoquePage> {
   @override
   Widget build(BuildContext context) {
     //semFotos = Provider.of<SemFotosRepository>(context);
+    carroRepo = context.watch<CarroRepository>();
+    tabela = carroRepo.tabela;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -72,50 +74,52 @@ class _EstoquePageState extends State<EstoquePage> {
           ),
         ],
       ),
-      body: AnimatedBuilder(
-        animation: carroRepo,
-        builder: (context, child) {
-          final tabela = CarroRepository.tabela;
-          return (tabela.isEmpty)
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.separated(
-                  itemCount: tabela.length,
-                  itemBuilder: (context, int carro) => ListTile(
-                    leading: Image.asset(tabela[carro].foto),
-                    title: Text(
-                      tabela[carro].marca + ' ' + tabela[carro].modelo,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: () => carroRepo.setupDadosTableCarro(),
+        child: AnimatedBuilder(
+          animation: carroRepo,
+          builder: (context, child) {
+            return (tabela.isEmpty)
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.separated(
+                    itemCount: tabela.length,
+                    itemBuilder: (context, int carro) => ListTile(
+                      leading: Image.asset(tabela[carro].foto),
+                      title: Text(
+                        tabela[carro].marca + ' ' + tabela[carro].modelo,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      subtitle: Text(tabela[carro].placa +
+                          '     ' +
+                          tabela[carro].anofab.toString() +
+                          '/' +
+                          tabela[carro].anomod.toString() +
+                          '     ' +
+                          real.format(tabela[carro].valor)),
+                      trailing: PopupMenuButton(
+                        itemBuilder: (context) => [
+                          PopupMenuItem(child: Text('Novo custo'), value: 0),
+                          PopupMenuItem(child: Text('Ver custos'), value: 1),
+                        ],
+                        onSelected: (result) {
+                          if (result == 0) {
+                            addCusto(tabela[carro]);
+                          }
+                          if (result == 1) {
+                            mostraCusto(tabela[carro]);
+                          }
+                        },
+                      ),
+                      onTap: () => addCusto(tabela[carro]),
                     ),
-                    subtitle: Text(tabela[carro].placa +
-                        '     ' +
-                        tabela[carro].anofab.toString() +
-                        '/' +
-                        tabela[carro].anomod.toString() +
-                        '     ' +
-                        real.format(tabela[carro].valor)),
-                    trailing: PopupMenuButton(
-                      itemBuilder: (context) => [
-                        PopupMenuItem(child: Text('Novo custo'), value: 0),
-                        PopupMenuItem(child: Text('Ver custos'), value: 1),
-                      ],
-                      onSelected: (result) {
-                        if (result == 0) {
-                          addCusto(tabela[carro]);
-                        }
-                        if (result == 1) {
-                          mostraCusto(tabela[carro]);
-                        }
-                      },
-                    ),
-                    onTap: () => addCusto(tabela[carro]),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  separatorBuilder: (_, __) => const Divider(),
-                );
-        },
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    separatorBuilder: (_, __) => const Divider(),
+                  );
+          },
+        ),
       ),
     );
   }
