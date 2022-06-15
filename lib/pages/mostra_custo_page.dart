@@ -98,7 +98,7 @@ class _MostraCustoPageState extends State<MostraCustoPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      child: Image.asset(widget.carro.foto),
+                      child: Image.network(widget.carro.foto),
                       width: 200,
                     ),
                     Container(width: 20),

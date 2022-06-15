@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/carro.dart';
+import '../repositories/sem_fotos_repository.dart';
 import '../services/auth_service.dart';
 
 class EstoquePage extends StatefulWidget {
@@ -19,13 +20,11 @@ class _EstoquePageState extends State<EstoquePage> {
   late CarroRepository carroRepo;
   NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
   late List<Carro> tabela;
-  //late SemFotosRepository semFotos;
+  late SemFotosRepository semFotos;
 
   @override
   void initState() {
     super.initState();
-    //carroRepo = CarroRepository();
-    //carroRepo.ordena();
   }
 
   addCusto(Carro carro) {
@@ -48,9 +47,10 @@ class _EstoquePageState extends State<EstoquePage> {
 
   @override
   Widget build(BuildContext context) {
-    //semFotos = Provider.of<SemFotosRepository>(context);
+    semFotos = context.watch<SemFotosRepository>();
     carroRepo = context.watch<CarroRepository>();
     tabela = carroRepo.tabela;
+    semFotos.getSemFotos(tabela);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -84,7 +84,7 @@ class _EstoquePageState extends State<EstoquePage> {
                 : ListView.separated(
                     itemCount: tabela.length,
                     itemBuilder: (context, int carro) => ListTile(
-                      leading: Image.asset(tabela[carro].foto),
+                      leading: Image.network(tabela[carro].foto, width: 90),
                       title: Text(
                         tabela[carro].marca + ' ' + tabela[carro].modelo,
                         style: const TextStyle(
@@ -113,7 +113,7 @@ class _EstoquePageState extends State<EstoquePage> {
                           }
                         },
                       ),
-                      onTap: () => addCusto(tabela[carro]),
+                      onTap: () => mostraCusto(tabela[carro]),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     separatorBuilder: (_, __) => const Divider(),

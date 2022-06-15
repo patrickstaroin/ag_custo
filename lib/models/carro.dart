@@ -1,6 +1,7 @@
 class Carro {
   int id;
-  String foto;
+  String foto =
+      'https://firebasestorage.googleapis.com/v0/b/agcusto.appspot.com/o/carros%2Fdefault.jpg?alt=media&token=e0574d70-eaeb-4614-ae17-61a05db3fbba';
   String marca;
   String modelo;
   String versao;
@@ -11,7 +12,6 @@ class Carro {
 
   Carro({
     required this.id,
-    required this.foto,
     required this.marca,
     required this.modelo,
     required this.versao,

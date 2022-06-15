@@ -28,9 +28,10 @@ class _SemFotosPageState extends State<SemFotosPage> {
 
   @override
   Widget build(BuildContext context) {
-    semFotos = Provider.of<SemFotosRepository>(context);
+    semFotos = context.watch<SemFotosRepository>();
     carroRepo = context.watch<CarroRepository>();
     tabela = carroRepo.tabela;
+    //semFotos.getSemFotos(tabela);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -51,7 +52,7 @@ class _SemFotosPageState extends State<SemFotosPage> {
               : ListView.separated(
                   itemCount: semFotos.lista.length,
                   itemBuilder: (context, int carro) => ListTile(
-                    leading: Image.asset(semFotos.lista[carro].foto),
+                    leading: Image.network(semFotos.lista[carro].foto),
                     title: Text(
                       semFotos.lista[carro].marca +
                           ' ' +
@@ -114,7 +115,7 @@ class _SemFotosPageState extends State<SemFotosPage> {
                       if (_formAddCarro.currentState!.validate()) {
                         Carro novoCarro = Carro(
                             id: 0,
-                            foto: 'images/default.jpg',
+                            //foto: 'images/default.jpg',
                             marca: '',
                             modelo: '',
                             versao: '',
@@ -123,7 +124,7 @@ class _SemFotosPageState extends State<SemFotosPage> {
                             valor: 0.0,
                             placa: _addPlaca);
                         carroRepo.atualizaEstoque(novoCarro);
-                        semFotos.attLista(tabela);
+                        semFotos.attLista(novoCarro);
                         _novoCarro.clear();
                         Navigator.pop(context);
                         setState(() {});

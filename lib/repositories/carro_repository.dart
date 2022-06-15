@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ag_custo/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../databases/db_firestore.dart';
@@ -16,10 +17,10 @@ class CarroRepository extends ChangeNotifier {
   List _tabelaID = [];
   late FirebaseFirestore dbFirestore;
   late AuthService auth;
-  List _tabelaIDnovos = [];
+  late FirebaseStorage storage;
 
   CarroRepository({required this.auth}) {
-    _setupCarrosTable();
+    _setupDatabase();
     setupDadosTableCarro();
   }
 
@@ -27,21 +28,14 @@ class CarroRepository extends ChangeNotifier {
     dbFirestore = DBFirestore.get();
   }
 
+  _startStorage() {
+    storage = FirebaseStorage.instance;
+  }
+
 /* INICA BANCOS DE DADOS */
-  _setupCarrosTable() async {
+  _setupDatabase() async {
     await _startFirestore();
-    final String table = '''
-      CREATE TABLE IF NOT EXISTS carros (
-        marca TEXT
-        modelo TEXT
-        anofab INTEGER
-        anomod INTEGER
-        placa TEXT
-        valor TEXT
-      );
-    ''';
-    //Database db = DB.instance.database;
-    //await db.execute(table);
+    await _startStorage();
   }
 
 /* RECUPERA TOKEN DO CLIENTE VIA API */
@@ -56,10 +50,10 @@ class CarroRepository extends ChangeNotifier {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       _token = json['token'];
-      print(_token);
+      //print(_token);
       return true;
     } else {
-      print("erro ao requisitar token!");
+      //print("erro ao requisitar token!");
       return false;
     }
   }
@@ -108,7 +102,6 @@ class CarroRepository extends ChangeNotifier {
       snapshot.docs.forEach((doc) {
         Carro carro = Carro(
           id: int.parse(doc.id),
-          foto: 'images/default.jpg',
           marca: doc.get('marca'),
           modelo: doc.get('modelo'),
           versao: doc.get('versao'),
@@ -117,9 +110,12 @@ class CarroRepository extends ChangeNotifier {
           placa: doc.get('placa'),
           valor: doc.get('valor'),
         );
-        _tabela.add(carro);
+        _tabela.add(carro); // adiciona carro com a foto padrão
       });
       notifyListeners();
+
+      await _getFotoFromAPI(); // recupera fotos via API e salva no Firebase Storage
+      getFotoFromStorage(); // recupera fotos do Firebase Storage para mostrar na tela
     }
   }
 
@@ -134,7 +130,9 @@ class CarroRepository extends ChangeNotifier {
 
       /* PERCORRE OS DOCUMENTOS E EXCLUI OS QUE NÃO CONSTAM NA LISTA DA API */
       snapshot.docs.forEach((doc) {
-        if (_tabelaID.contains(int.parse(doc.id)) == false) {
+        if (_tabelaID.contains(int.parse(doc.id)) == false &&
+            int.parse(doc.id) > 10000) {
+          // não exclui carros adicionados pelo próprio aplicativo
           dbFirestore
               .collection('usuarios/${auth.usuario!.email}/carros')
               .doc(doc.id)
@@ -170,7 +168,6 @@ class CarroRepository extends ChangeNotifier {
       final Map<dynamic, dynamic> detalhes = json['detalhes'];
       Carro carro = Carro(
         id: id,
-        foto: 'images/default.jpg',
         marca: detalhes['marca_nome'],
         modelo: detalhes['modelo_nome'],
         versao: detalhes['versao'],
@@ -180,7 +177,8 @@ class CarroRepository extends ChangeNotifier {
         valor: double.parse(detalhes['preco'].toString()),
       );
       atualizaEstoque(carro);
-      print(carro.marca + " " + carro.modelo + " adicionado ao firebase");
+
+      // print(carro.marca + " " + carro.modelo + " adicionado ao firebase");
     }
   }
 
@@ -200,11 +198,68 @@ class CarroRepository extends ChangeNotifier {
     tabela.add(carro);
   }
 
-  _carrosTableIsEmpty() async {
-    //Database db = await DB.instance.database;
-    //List resultados = await db.query('carros');
-    //return resultados.isEmpty;
-    return true;
+/* RECUPERA FOTOS DE TODOS OS CARROS VIA API */
+  _getFotoFromAPI() async {
+    _tabelaID.forEach((id) async {
+      final storageRef = storage.ref("carros/${id}/");
+
+      final listResultado = await storageRef.listAll();
+      if (listResultado.items.isEmpty) {
+        // verifica se já possui as fotos do carro armazenadas
+        //print("nao tem foto");
+        String uri = 'https://agintegracao.com/api/v1/veiculos/${id}/fotos';
+
+        final response = await http.get(
+          Uri.parse(uri),
+          headers: {
+            "X-AutoGestor-Token": _token,
+            "X-AutoGestor-Cliente": "1476",
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final json = jsonDecode(response.body);
+          final List<dynamic> fotos = json['fotos'];
+          if (fotos.isNotEmpty) {
+            // verifica se o carro possui fotos na API
+            fotos.forEach((foto) async {
+              await storageRef
+                  .child('${foto['ordem']}')
+                  .putString(foto['base64'], format: PutStringFormat.base64);
+              //print("adicionou foto ao Firebase Storage");
+            });
+          }
+        }
+      }
+    });
+  }
+
+  /* RECUPERA FOTO DE TODOS OS CARROS DO FIREBASE STORAGE */
+  getFotoFromStorage() async {
+    _tabela.forEach((carro) async {
+      if (carro.foto ==
+          'https://firebasestorage.googleapis.com/v0/b/agcusto.appspot.com/o/carros%2Fdefault.jpg?alt=media&token=e0574d70-eaeb-4614-ae17-61a05db3fbba') {
+        final storageRef = storage.ref("carros/${carro.id}/");
+        String fotoUrl = '';
+
+        final listResultado = await storageRef.listAll();
+        if (listResultado.items.isNotEmpty) {
+          try {
+            fotoUrl = await storageRef.child('0').getDownloadURL();
+            carro.foto = fotoUrl;
+          } catch (error) {
+            try {
+              fotoUrl = await storageRef.child('1').getDownloadURL();
+              carro.foto = fotoUrl;
+            } catch (error) {
+              // print("nao tem foto");
+            }
+          }
+        }
+      }
+
+      notifyListeners();
+    });
   }
 
   ordena() {
