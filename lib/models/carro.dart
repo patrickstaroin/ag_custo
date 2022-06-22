@@ -9,6 +9,7 @@ class Carro {
   int anomod;
   String placa;
   double valor;
+  List<String> tabelaFotos = [];
 
   Carro({
     required this.id,

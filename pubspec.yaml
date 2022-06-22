@@ -36,11 +36,31 @@ dependencies:
   cloud_firestore: "^3.1.14"
   firebase_storage: ^10.2.17
   http: ^0.13.4
+  image_picker: ^0.8.5+3
+  flutter_launcher_icons: ^0.9.3
+  flutter_native_splash:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   english_words: ^4.0.0
+
+flutter_native_splash:
+  color: "#00FFFF"
+  image: "assets/app/aglogo.png"
+  android: true
+  ios: true
+
+
+flutter_icons:
+  image_path: "assets/app/aglogo.png"
+  ios: true
+  remove_alpha_ios: true
+  android: "launcher_icon"
+  adaptive_icon_background: "#00FFFF"
+  adaptive_icon_foreground: "assets/app/aglogo.png"
+
+
 
 dev_dependencies:
   flutter_test:

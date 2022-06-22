@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/carro.dart';
 import '../repositories/sem_fotos_repository.dart';
 import '../services/auth_service.dart';
+import 'fotos_page.dart';
 
 class EstoquePage extends StatefulWidget {
   const EstoquePage({Key? key}) : super(key: key);
@@ -43,6 +44,15 @@ class _EstoquePageState extends State<EstoquePage> {
         builder: (_) => MostraCustoPage(carro: carro),
       ),
     );
+  }
+
+  mostraFotos(Carro carro) {
+    carroRepo.buscaFotos(carro);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FotosPage(carro: carro),
+            fullscreenDialog: true));
   }
 
   @override
@@ -103,6 +113,7 @@ class _EstoquePageState extends State<EstoquePage> {
                         itemBuilder: (context) => [
                           PopupMenuItem(child: Text('Novo custo'), value: 0),
                           PopupMenuItem(child: Text('Ver custos'), value: 1),
+                          PopupMenuItem(child: Text('Ver fotos'), value: 2),
                         ],
                         onSelected: (result) {
                           if (result == 0) {
@@ -110,6 +121,9 @@ class _EstoquePageState extends State<EstoquePage> {
                           }
                           if (result == 1) {
                             mostraCusto(tabela[carro]);
+                          }
+                          if (result == 2) {
+                            mostraFotos(tabela[carro]);
                           }
                         },
                       ),

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../models/carro.dart';
 import '../repositories/carro_repository.dart';
+import 'fotos_page.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SemFotosPage extends StatefulWidget {
   SemFotosPage({Key? key}) : super(key: key);
@@ -24,6 +26,15 @@ class _SemFotosPageState extends State<SemFotosPage> {
 
   void initState() {
     super.initState();
+  }
+
+  mostraFotos(Carro carro) {
+    carroRepo.buscaFotos(carro);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FotosPage(carro: carro),
+            fullscreenDialog: true));
   }
 
   @override
@@ -67,8 +78,22 @@ class _SemFotosPageState extends State<SemFotosPage> {
                         semFotos.lista[carro].anofab.toString() +
                         '/' +
                         semFotos.lista[carro].anomod.toString()),
-                    trailing: Text(real.format(semFotos.lista[carro].valor)),
-                    // onTap: () => addCusto(tabela[carro]),
+                    trailing: PopupMenuButton(
+                      itemBuilder: (context) => [
+                        PopupMenuItem(child: Text('Ver fotos'), value: 0),
+                      ],
+                      onSelected: (result) {
+                        if (result == 0) {
+                          mostraFotos(semFotos.lista[carro]);
+                        }
+                      },
+                    ),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                FotosPage(carro: semFotos.lista[carro]),
+                            fullscreenDialog: true)),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   separatorBuilder: (_, __) => const Divider(),
@@ -114,7 +139,7 @@ class _SemFotosPageState extends State<SemFotosPage> {
                     onPressed: () {
                       if (_formAddCarro.currentState!.validate()) {
                         Carro novoCarro = Carro(
-                            id: 0,
+                            id: carroRepo.contadorID,
                             //foto: 'images/default.jpg',
                             marca: '',
                             modelo: '',
@@ -125,6 +150,7 @@ class _SemFotosPageState extends State<SemFotosPage> {
                             placa: _addPlaca);
                         carroRepo.atualizaEstoque(novoCarro);
                         semFotos.attLista(novoCarro);
+                        carroRepo.contadorID++;
                         _novoCarro.clear();
                         Navigator.pop(context);
                         setState(() {});

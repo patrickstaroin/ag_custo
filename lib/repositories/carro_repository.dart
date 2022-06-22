@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:ag_custo/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../databases/db_firestore.dart';
 import '../models/carro.dart';
@@ -18,6 +20,7 @@ class CarroRepository extends ChangeNotifier {
   late FirebaseFirestore dbFirestore;
   late AuthService auth;
   late FirebaseStorage storage;
+  int contadorID = 0;
 
   CarroRepository({required this.auth}) {
     _setupDatabase();
@@ -260,6 +263,46 @@ class CarroRepository extends ChangeNotifier {
 
       notifyListeners();
     });
+  }
+
+  buscaFotos(Carro carro) async {
+    if (carro.tabelaFotos.isEmpty) {
+      final storageRef = storage.ref("carros/${carro.id}/");
+      String fotoUrl = '';
+
+      final listResultado = await storageRef.listAll();
+      if (listResultado.items.isEmpty) {
+        return;
+      }
+      for (int i = 0; i < listResultado.items.length; i++) {
+        try {
+          fotoUrl = await storageRef.child('$i').getDownloadURL();
+          carro.tabelaFotos.add(fotoUrl);
+          print(i);
+          notifyListeners();
+        } catch (error) {
+          print(error);
+        }
+      }
+    }
+  }
+
+  uploadFoto(Carro carro, File foto) async {
+    final storageRef = storage.ref("carros/${carro.id}/");
+    //final listResultado = await storageRef.listAll();
+    int n = carro.tabelaFotos.length;
+
+    final destino = storageRef.child('$n');
+    await destino.putFile(foto).whenComplete(() async {
+      await destino.getDownloadURL().then((value) {
+        print(value);
+        carro.tabelaFotos.add(value);
+      });
+    });
+
+    //carro.tabelaFotos.add(await storageRef.child('$n').getDownloadURL());
+    getFotoFromStorage();
+    //notifyListeners();
   }
 
   ordena() {
